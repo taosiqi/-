@@ -1,0 +1,128 @@
+vue跨域接口配置
+项目根目录新建.env .env.development .env.production文件
+.env  --配置所有情况下都会用到的配置
+.env.development --开发模式会读取的配置
+.env.production  --生产环境会用到的配置
+
+.env
+	
+.env.development
+	NODE_ENV = 'development'
+	VUE_APP_BASE_API='https://input520.cn'  //开发模式接口域名
+.env.production
+	NODE_ENV = 'production'
+	VUE_APP_BASE_API='http://monkey.input520.cn/' //生产环境接口域名 注意生产环境跨域问题
+
+根目录新建vue.config.js
+	module.exports = {
+	  publicPath: "/",
+	  devServer: {   //跨域配置
+		proxy: {
+		  '/api': {  // /api自动匹配转发接口
+			target: process.env.VUE_APP_BASE_API, //对应自己的接口
+			changeOrigin: true,
+			ws: true,
+			pathRewrite: {
+			  "^/api": ""
+			}
+		  }
+		}
+	  }
+	}
+
+新建http.js
+	import axios from 'axios'
+	import qs from 'qs'
+	axios.defaults.timeout = 5000 //响应时间
+	axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8' //配置请求头
+	*** process.env.NODE_ENV == 'development' ? axios.defaults.baseURL = '/api' : axios.defaults.baseURL = process.env.VUE_APP_BASE_API
+	//开发环境下 axios的默认url是/api，，生成环境下是.env.production 里面配置的域名
+	
+	//POST传参序列化(添加请求拦截器)
+	axios.interceptors.request.use(
+	  config => {
+		//在发送请求之前做某件事
+		if (config.method === 'post') {
+		  config.data = qs.stringify(config.data)
+		}
+		return config
+	  },
+	  error => {
+		return Promise.reject(error)
+	  }
+	)
+
+	//返回状态判断(添加响应拦截器)
+	axios.interceptors.response.use(
+	  res => {
+		//对响应数据做些事
+		if (!res.data.success) {
+		  return Promise.resolve(res)
+		}
+		return res
+	  },
+	  error => {
+		return Promise.reject(error)
+	  }
+	)
+
+	//返回一个Promise(发送post请求)
+	export function fetchPost(url, params) {
+	  return new Promise((resolve, reject) => {
+		axios
+		  .post(url, params)
+		  .then(
+			response => {
+			  resolve(response)
+			},
+			err => {
+			  reject(err)
+			}
+		  )
+		  .catch(error => {
+			reject(error)
+		  })
+	  })
+	}
+	////返回一个Promise(发送get请求)
+	export function fetchGet(url, param) {
+	  return new Promise((resolve, reject) => {
+		axios
+		  .get(url, {
+			params: param
+		  })
+		  .then(
+			response => {
+			  resolve(response)
+			},
+			err => {
+			  reject(err)
+			}
+		  )
+		  .catch(error => {
+			reject(error)
+		  })
+	  })
+	}
+	export default {
+	  fetchPost,
+	  fetchGet
+	}
+	
+	
+其他文件调接口格式如下
+      https
+        .fetchGet("/msg.json") //开发环境下,axios会先给/msg.json加上/api, 拼成/api/msg.json, 这个拼成的接口再去匹配vue.config.js里面的跨域
+        .then(res => {
+          console.log(res);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+	
+	按照这样的配置，只需要在.env.development 和.env.production里面配置好开发环境域名和生产环境域名就行了,注意生产环境跨域问题
+	
+	
+	思路：在env里面配置好两个不同的域名后,再去配置axios的默认接口路径,生产环境直接匹配生产环境的域名，开发环境匹配一个/api ,这个/api是跨域需要
+	的，要和跨域那里配置一样，开发环境下调接口会在前面加上一个/api,然后/api/xxx这个接口再去跨域配置里面匹配上开发环境的接口域名，这样子就可以解决
+	接口里面写了一个/api,导致线上环境的路径错了
