@@ -1,0 +1,17 @@
+官网-->https://stuk.github.io/jszip/
+安装jszip --> npm install jszip 
+可以在main.js或者需要引入的地方引入-->import jszip from "jszip";
+实例化jszip -->let zip = new jszip();
+配置jszip压缩-->
+var formData = new FormData(); //formData对象实例 通过append方法添加数据 formData.append(name, value, filename);
+zip.generateAsync({
+	type: "blob", //压缩的文件类型
+	compression: "DEFLATE", //压缩方法
+	compressionOptions: {
+	level: 9 //压缩比 1-9 1最低9最高
+	}
+}).then(function(content) { //成功的回调
+	let mydata = new Date(); //定义一个时间戳作为文件名
+	formData.append("file",content, mydata.getTime() + ".zip");
+	fileUp(); //文件上传函数
+});

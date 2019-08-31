@@ -1,0 +1,12 @@
+1.在vue单文件里面,this一般会指向当前的vue实例,因此可以直接使用 this.$message使用消息提示框,
+但是在单独的js文件中, this一般会指向当前的window，
+要使用this.$message这种写法  可以在main.js中 把vue实例赋值给一个常量 如下：
+const bus = new Vue() -->bus指向vue实例
+window.bus = bus -->把bus绑定到window上
+
+2.
+	
+Object.defineProperties(Vue.prototype, {
+  $msg: { get() { return notify; } },
+})
+
