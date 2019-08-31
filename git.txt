@@ -1,0 +1,17 @@
+基本要用到的
+配置用户
+$ git config --global user.name "Your Name"
+$ git config --global user.email "email@example.com"
+克隆一个自己的仓库
+git clone git://github.com/schacon/ticgit.git
+配置key，在仓库设置里面的Deploy keys里面把id_rsa.pub文件的内容填写进去
+ssh-keygen -t rsa -C "1870894297@qq.com"
+
+关联远程仓库
+ git remote add 仓库缩写 仓库地址 
+ 查看仓库
+ git remote -v
+上传文件
+git add <file>
+git commit -m "description"
+git push -u origin master u表示第一次提交 之后git push就可以了
