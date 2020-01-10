@@ -7,3 +7,6 @@
 # nprogress
 浏览器加载时顶部的进度条
 [http://ricostacruz.com/nprogress/](http://ricostacruz.com/nprogress/)
+# fontawesome图标库
+一个图标库 图标比较多 但是比较大
+[http://www.fontawesome.com.cn/](http://www.fontawesome.com.cn/)
